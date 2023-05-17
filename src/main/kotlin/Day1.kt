@@ -1,8 +1,8 @@
 fun solveDay1() {
     val sortedCalorieCounts = getCalorieCounts().sorted().reversed()
-    println("Max calorie count: ${sortedCalorieCounts.first()}")
+    println("Max calorie count: ${sortedCalorieCounts.first()}") // 69501
 
-    val sumOfTopThree = sortedCalorieCounts.take(3).sum()
+    val sumOfTopThree = sortedCalorieCounts.take(3).sum() // 202346
     println("Sum of top 3: $sumOfTopThree")
 }
 
