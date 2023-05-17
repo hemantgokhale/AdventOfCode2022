@@ -27,15 +27,6 @@ enum class Play {
 }
 
 data class Round(val their: Play, val my: Play) {
-    companion object {
-        fun fromString(round: String): Round? {
-            val trimmed = round.trim()
-            val theirPlay = Play.fromChar(trimmed.first()) ?: return null
-            val myPlay = Play.fromChar(trimmed.last()) ?: return null
-            return Round(theirPlay, myPlay)
-        }
-    }
-
     private val iWon: Boolean
         get() = (their == Play.ROCK && my == Play.PAPER)
                 || (their == Play.PAPER && my == Play.SCISSORS)
@@ -49,8 +40,43 @@ data class Round(val their: Play, val my: Play) {
     val myScore: Int = my.score + (if (iWon) 6 else 0) + (if (draw) 3 else 0)
 }
 
+// Interpret the second part of the string as a record of the round that I played
+fun String.asRound(): Round? {
+    val trimmed = trim()
+    val theirPlay = Play.fromChar(trimmed.first()) ?: return null
+    val myPlay = Play.fromChar(trimmed.last()) ?: return null
+    return Round(theirPlay, myPlay)
+}
 
-fun readGame(input: String): List<Round> = input.lineSequence().mapNotNull { Round.fromString(it) }.toList()
+// Interpret the second part of the string as the outcome I should play for i.e. strategy
+fun String.asStrategy(): Round? {
+    val trimmed = trim()
+    val theirPlay: Play = Play.fromChar(trimmed.first()) ?: return null
+    val myPlay: Play = when (trimmed.last()) {
+        'X' -> // lose
+            when (theirPlay) {
+                Play.ROCK -> Play.SCISSORS
+                Play.PAPER -> Play.ROCK
+                Play.SCISSORS -> Play.PAPER
+            }
+
+        'Y' -> // draw
+            theirPlay
+
+        'Z' -> // win
+            when (theirPlay) {
+                Play.ROCK -> Play.PAPER
+                Play.PAPER -> Play.SCISSORS
+                Play.SCISSORS -> Play.ROCK
+            }
+
+        else -> null
+    } ?: return null
+
+    return Round(theirPlay, myPlay)
+}
+
+fun readGame(input: String): List<Round> = input.lineSequence().mapNotNull { it.asStrategy() }.toList()
 
 private val testInput = """
     A Y
