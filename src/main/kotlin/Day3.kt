@@ -1,17 +1,52 @@
 fun solveDay3() {
-    val totalPriority = realInput
-        .lineSequence()
-        .map { it.toRucksack() }
-        .map { it.compartment1.intersect(it.compartment2) }
-        .map { it.first() }
-        .sumOf { priority[it] ?: 0 }
+    // part 1
+    assert(getTotalRucksackPriority(testInput) == 157)
+    assert(getTotalRucksackPriority(realInput) == 7997)
 
-    println(totalPriority) // 7997
+    // part 2
+    assert(getTotalBadgePriority(testInput) == 70)
+    assert(getTotalBadgePriority(realInput) == 2545)
 }
 
-data class Rucksack(val compartment1: Set<Char>, val compartment2: Set<Char>)
+fun getTotalBadgePriority(input: String): Int {
+    var sacks = input.lineSequence().map { Rucksack(it) }.toMutableList()
+    val sackGroups = mutableListOf<SackGroup>()
+    while (sacks.isNotEmpty()) {
+        sackGroups.add(SackGroup(sacks.take(3)))
+        sacks = sacks.drop(3).toMutableList()
+    }
 
-fun String.toRucksack() = Rucksack(take(length / 2).toSet(), takeLast(length / 2).toSet())
+    return sackGroups
+        .map { it.commonItem }
+        .sumOf { priority[it] ?: 0 }
+}
+
+fun getTotalRucksackPriority(input: String) = input
+    .lineSequence()
+    .map { Rucksack(it).commonItem }
+    .sumOf { priority[it] ?: 0 }
+
+class SackGroup(sacks: List<Rucksack>) {
+    val commonItem: Char
+
+    init {
+        commonItem = sacks.fold(sacks.first().contents.toSet()) { acc, rucksack ->
+            acc.toSet().intersect(rucksack.contents.toSet())
+        }.first()
+    }
+}
+
+class Rucksack(val contents: String) {
+    val compartment1: String
+    val compartment2: String
+    val commonItem: Char
+
+    init {
+        compartment1 = contents.take(contents.length / 2)
+        compartment2 = contents.takeLast(contents.length / 2)
+        commonItem = compartment1.toSet().intersect(compartment2.toSet()).first()
+    }
+}
 
 private val priority = buildMap(52) {
     var p = 1
