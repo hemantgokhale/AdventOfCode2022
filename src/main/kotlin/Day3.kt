@@ -9,16 +9,14 @@ fun solveDay3() {
 }
 
 fun getTotalBadgePriority(input: String): Int {
-    var sacks = input.lineSequence().map { Rucksack(it) }.toMutableList()
+    val sacks = input.lineSequence().map { Rucksack(it) }.toMutableList()
     val sackGroups = mutableListOf<SackGroup>()
-    while (sacks.isNotEmpty()) {
-        sackGroups.add(SackGroup(sacks.take(3)))
-        sacks = sacks.drop(3).toMutableList()
+
+    for (i in 0..(sacks.size - 3) step 3) {
+        sackGroups.add(SackGroup(sacks.slice(i..i + 2)))
     }
 
-    return sackGroups
-        .map { it.commonItem }
-        .sumOf { priority[it] ?: 0 }
+    return sackGroups.map { it.commonItem }.sumOf { priority[it] ?: 0 }
 }
 
 fun getTotalRucksackPriority(input: String) = input
@@ -30,21 +28,21 @@ class SackGroup(sacks: List<Rucksack>) {
     val commonItem: Char
 
     init {
-        commonItem = sacks.fold(sacks.first().contents.toSet()) { acc, rucksack ->
-            acc.toSet().intersect(rucksack.contents.toSet())
+        commonItem = sacks.fold(sacks.first().uniqueItems) { acc, rucksack ->
+            acc.intersect(rucksack.uniqueItems)
         }.first()
     }
 }
 
-class Rucksack(val contents: String) {
-    val compartment1: String
-    val compartment2: String
+data class Rucksack(val contents: String) {
     val commonItem: Char
+    val uniqueItems: Set<Char>
 
     init {
-        compartment1 = contents.take(contents.length / 2)
-        compartment2 = contents.takeLast(contents.length / 2)
-        commonItem = compartment1.toSet().intersect(compartment2.toSet()).first()
+        val compartment1 = contents.take(contents.length / 2).toSet()
+        val compartment2 = contents.takeLast(contents.length / 2).toSet()
+        uniqueItems = compartment1.union(compartment2)
+        commonItem = compartment1.intersect(compartment2).first()
     }
 }
 
