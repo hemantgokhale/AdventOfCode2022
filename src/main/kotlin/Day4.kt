@@ -3,20 +3,22 @@ fun solveDay4() {
     assert(realInput.fullyContainedCount() == 462)
 }
 
-data class ElfPair(val section1: IntRange, val section2: IntRange) {
+private data class ElfPair(val section1: IntRange, val section2: IntRange) {
     val fullyContained: Boolean = section1.contains(section2) || section2.contains(section1)
 }
 
-fun String.toElfPair(): ElfPair {
-    val ranges = trim()
-        .split(",")
-        .map { it.split("-") }
-        .map { IntRange(it.first().toInt(), it.last().toInt()) }
-    return ElfPair(ranges.first(), ranges.last())
-}
+private val regex = Regex("""(\d+)-(\d+),(\d+)-(\d+)""")
+private fun String.toElfPair(): ElfPair? =
+    regex.matchEntire(this)
+        ?.destructured
+        ?.let { (start1, end1, start2, end2) ->
+            ElfPair(IntRange(start1.toInt(), end1.toInt()), IntRange(start2.toInt(), end2.toInt()))
+        }
 
-fun String.fullyContainedCount(): Int = lineSequence().map { it.toElfPair() }.filter { it.fullyContained }.count()
-fun IntRange.contains(other: IntRange) = (other.first >= first) && (other.last <= last)
+private fun String.fullyContainedCount(): Int =
+    lineSequence().mapNotNull { it.toElfPair() }.filter { it.fullyContained }.count()
+
+private fun IntRange.contains(other: IntRange) = (other.first >= first) && (other.last <= last)
 
 private val testInput = """
     2-4,6-8
