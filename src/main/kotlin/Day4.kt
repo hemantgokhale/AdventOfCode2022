@@ -1,10 +1,13 @@
 fun solveDay4() {
     assert(testInput.fullyContainedCount() == 2)
     assert(realInput.fullyContainedCount() == 462)
+    assert(testInput.overlappingCount() == 4)
+    assert(realInput.overlappingCount() == 835)
 }
 
 private data class ElfPair(val section1: IntRange, val section2: IntRange) {
     val fullyContained: Boolean = section1.contains(section2) || section2.contains(section1)
+    val overlapping: Boolean = section1.overlaps(section2)
 }
 
 private val regex = Regex("""(\d+)-(\d+),(\d+)-(\d+)""")
@@ -18,7 +21,11 @@ private fun String.toElfPair(): ElfPair? =
 private fun String.fullyContainedCount(): Int =
     lineSequence().mapNotNull { it.toElfPair() }.filter { it.fullyContained }.count()
 
+private fun String.overlappingCount(): Int =
+    lineSequence().mapNotNull { it.toElfPair() }.filter { it.overlapping }.count()
+
 private fun IntRange.contains(other: IntRange) = (other.first >= first) && (other.last <= last)
+private fun IntRange.overlaps(other: IntRange) = (first in other) || (last in other) || (other.first in this) || (other.last in this)
 
 private val testInput = """
     2-4,6-8
