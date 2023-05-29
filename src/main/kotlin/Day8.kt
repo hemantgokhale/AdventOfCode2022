@@ -1,6 +1,8 @@
 fun solveDay8() {
     assert(testInput.readTrees().count { it.isVisible } == 21)
     assert(realInput.readTrees().count { it.isVisible } == 1870)
+    assert(testInput.readTrees().maxBy { it.scenicScore }.scenicScore == 8)
+    assert(realInput.readTrees().maxBy { it.scenicScore }.scenicScore == 517440)
 }
 
 private data class Tree(val row: Int, val column: Int, val forest: List<List<Int>>) {
@@ -34,6 +36,42 @@ private data class Tree(val row: Int, val column: Int, val forest: List<List<Int
     }
     val isVisible: Boolean by lazy {
         isOnEdge || isVisibleFromTop || isVisibleFromBottom || isVisibleFromLeft || isVisibleFromRight
+    }
+
+    val topScenicScore: Int by lazy {
+        var score = 0
+        for (i in row - 1 downTo 0) {
+            score++
+            if (forest[i][column] >= height) break
+        }
+        score
+    }
+    val bottomScenicScore: Int by lazy {
+        var score = 0
+        for (i in row + 1 until rowCount) {
+            score++
+            if (forest[i][column] >= height) break
+        }
+        score
+    }
+    val leftScenicScore: Int by lazy {
+        var score = 0
+        for (i in column - 1 downTo 0) {
+            score++
+            if (forest[row][i] >= height) break
+        }
+        score
+    }
+    val rightScenicScore: Int by lazy {
+        var score = 0
+        for (i in column + 1 until columnCount) {
+            score++
+            if (forest[row][i] >= height) break
+        }
+        score
+    }
+    val scenicScore: Int by lazy {
+        if (isOnEdge) 0 else topScenicScore * bottomScenicScore * leftScenicScore * rightScenicScore
     }
 }
 
