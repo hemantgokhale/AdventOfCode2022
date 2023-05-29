@@ -1,71 +1,52 @@
 fun solveDay8() {
-    assert(testInput.visibleCount() == 21)
-    assert(realInput.visibleCount() == 1870)
+    assert(testInput.readTrees().count { it.isVisible } == 21)
+    assert(realInput.readTrees().count { it.isVisible } == 1870)
 }
 
-private fun String.visibleCount(): Int {
-    val trees = readTrees()
-    var visibleCount = 0
-    for (row in trees.indices) {
-        for (column in 0 until trees[0].size) {
-            if (trees.isVisible(row, column)) visibleCount++
+private data class Tree(val row: Int, val column: Int, val forest: List<List<Int>>) {
+    private val rowCount: Int by lazy { forest.size }
+    private val columnCount: Int by lazy { forest.first().size }
+    private val height: Int by lazy { forest[row][column] }
+    private val isOnEdge: Boolean by lazy { (row == 0) || (row == rowCount - 1) || (column == 0) || (column == columnCount - 1) }
+    private val isVisibleFromTop: Boolean by lazy {
+        for (i in 0 until row) {
+            if (forest[i][column] >= height) return@lazy false
         }
+        true
     }
-    return visibleCount
+    private val isVisibleFromBottom: Boolean by lazy {
+        for (i in row + 1 until rowCount) {
+            if (forest[i][column] >= height) return@lazy false
+        }
+        true
+    }
+    private val isVisibleFromLeft: Boolean by lazy {
+        for (i in 0 until column) {
+            if (forest[row][i] >= height) return@lazy false
+        }
+        true
+    }
+    private val isVisibleFromRight: Boolean by lazy {
+        for (i in column + 1 until columnCount) {
+            if (forest[row][i] >= height) return@lazy false
+        }
+        true
+    }
+    val isVisible: Boolean by lazy {
+        isOnEdge || isVisibleFromTop || isVisibleFromBottom || isVisibleFromLeft || isVisibleFromRight
+    }
 }
 
-private fun String.readTrees(): List<List<Int>> = lineSequence().map { line -> line.map { it.digitToInt() } }.toList()
-
-private fun List<List<Int>>.isVisible(row: Int, column: Int): Boolean {
-    val thisValue = this[row][column]
-    val rowCount = size
-    val columnCount = first().size
-    if ((row == 0) || (row == rowCount - 1) || (column == 0) || (column == columnCount - 1)) return true
-
-    // visibility from top
-    var isHiddenFromTop = false
-    for (i in 0 until row) {
-        if (this[i][column] >= thisValue) {
-            isHiddenFromTop = true
-            break
+private fun String.readTrees(): List<Tree> {
+    val forest = lineSequence().map { line -> line.map { it.digitToInt() } }.toList()
+    val trees = mutableListOf<Tree>()
+    for (row in forest.indices) {
+        for (column in forest.first().indices) {
+            trees.add(Tree(row, column, forest))
         }
     }
-    isHiddenFromTop || return true
-
-    // visibility from bottom
-    var isHiddenFromBottom = false
-    for (i in row + 1 until rowCount) {
-        if (this[i][column] >= thisValue) {
-            isHiddenFromBottom = true
-            break
-        }
-    }
-    isHiddenFromBottom || return true
-
-    // visibility from left
-    var isHiddenFromLeft = false
-    for (i in 0 until column) {
-        if (this[row][i] >= thisValue) {
-            isHiddenFromLeft = true
-            break
-        }
-    }
-    isHiddenFromLeft || return true
-
-    // visibility from right
-    var isHiddenFromRight = false
-    for (i in column + 1 until columnCount) {
-        if (this[row][i] >= thisValue) {
-            isHiddenFromRight = true
-            break
-        }
-
-    }
-    isHiddenFromRight || return true
-
-    return false
+    return trees
 }
-
 
 private val testInput = """
 30373
