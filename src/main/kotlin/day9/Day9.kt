@@ -3,14 +3,20 @@ package day9
 import kotlin.math.abs
 
 fun solveDay9() {
-    assert(testInput.moveHistorySize() == 13)
-    assert(realInput.moveHistorySize() == 5907)
+    // part 1
+    assert(testInput1.moveHistorySize(2) == 13)
+    assert(realInput.moveHistorySize(2) == 5907)
+
+    // part 2
+    assert(testInput1.moveHistorySize(10) == 1)
+    assert(testInput2.moveHistorySize(10) == 36)
+    assert(realInput.moveHistorySize(10) == 2303)
 }
 
-private fun String.moveHistorySize() : Int {
-    val rope = Rope()
+private fun String.moveHistorySize(knotCount: Int): Int {
+    val rope = Rope(knotCount)
     moves().forEach { rope.apply(it) }
-    return rope.tail.moveHistory.size
+    return rope.knots.last().moveHistory.size
 }
 
 private data class Move(val direction: Char, val distance: Int)
@@ -28,17 +34,6 @@ private class Knot(initialX: Int, initialY: Int) {
         moveHistory.add(location)
     }
 
-    fun moveOneStep(direction: Char) {
-        location = when (direction) {
-            'R' -> Location(location.x + 1, location.y)
-            'L' -> Location(location.x - 1, location.y)
-            'U' -> Location(location.x, location.y + 1)
-            'D' -> Location(location.x, location.y - 1)
-            else -> location
-        }
-        moveHistory.add(location)
-    }
-
     fun setNewLocation(location: Location) {
         this.location = location
         moveHistory.add(location)
@@ -50,18 +45,34 @@ private class Knot(initialX: Int, initialY: Int) {
     override fun toString(): String = location.toString()
 }
 
-private class Rope {
-    val head = Knot(0, 0)
-    val tail = Knot(0, 0)
+private class Rope(knotCount: Int) {
+    val knots = List(knotCount) { Knot(0, 0) }
 
     fun apply(move: Move) {
         repeat(move.distance) {
-            head.moveOneStep(move.direction)
-            repositionTail()
+            moveHeadByOneStep(move.direction)
+            for (i in 1 until knots.size) {
+                repositionKnot(i)
+            }
         }
     }
 
-    fun repositionTail() {
+    fun moveHeadByOneStep(direction: Char) {
+        val head = knots.first()
+        val location = when (direction) {
+            'R' -> Location(head.location.x + 1, head.location.y)
+            'L' -> Location(head.location.x - 1, head.location.y)
+            'U' -> Location(head.location.x, head.location.y + 1)
+            'D' -> Location(head.location.x, head.location.y - 1)
+            else -> head.location
+        }
+        head.setNewLocation(location)
+    }
+
+    // Reposition the specified knot to follow is head (i.e. the knot before it)
+    fun repositionKnot(index: Int) {
+        val head = knots[index - 1]
+        val tail = knots[index]
         if (tail.isTouching(head)) return
 
         val newLocation =
@@ -69,17 +80,18 @@ private class Rope {
                 Location((tail.location.x + head.location.x) / 2, tail.location.y)
             } else if ((tail.location.x == head.location.x) && abs(tail.location.y - head.location.y) > 1) { // same column
                 Location(tail.location.x, (tail.location.y + head.location.y) / 2)
+            } else if ((abs(tail.location.x - head.location.x) > 1) && (abs(tail.location.y - head.location.y) > 1)) { // apart by 2 on both axes
+                Location((tail.location.x + head.location.x) / 2, (tail.location.y + head.location.y) / 2)
             } else if (abs(tail.location.x - head.location.x) > 1) { // apart by 2 on x-axis
                 Location((tail.location.x + head.location.x) / 2, head.location.y) // move diagonally
             } else { // apart by 2 on y-axis
                 Location(head.location.x, (tail.location.y + head.location.y) / 2) // move diagonally
             }
 
-
-        tail.setNewLocation(newLocation)
-        assert(tail.isTouching(head)) {
+        assert(Knot(newLocation.x, newLocation.y).isTouching(head)) {
             "Could not move the tail to a location that is touching the head. Should never have reached here."
         }
+        tail.setNewLocation(newLocation)
     }
 }
 
@@ -93,7 +105,7 @@ private fun String.moves(): List<Move> =
         }
         .toList()
 
-private val testInput = """
+private val testInput1 = """
 R 4
 U 4
 L 3
@@ -102,6 +114,17 @@ R 4
 D 1
 L 5
 R 2
+""".trimIndent()
+
+private val testInput2 = """
+R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20
 """.trimIndent()
 
 private val realInput = """
