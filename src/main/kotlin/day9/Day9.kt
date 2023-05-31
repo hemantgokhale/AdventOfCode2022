@@ -24,25 +24,21 @@ private data class Location(val x: Int, val y: Int) {
     override fun toString(): String = "($x, $y)"
 }
 
-private class Knot(initialX: Int, initialY: Int) {
-    var location: Location
-        private set
+private class Knot(var x: Int, var y: Int) {
     val moveHistory = mutableSetOf<Location>()
 
     init {
-        location = Location(initialX, initialY)
-        moveHistory.add(location)
+        moveHistory.add(Location(x, y))
     }
 
     fun setNewLocation(location: Location) {
-        this.location = location
+        x = location.x
+        y = location.y
         moveHistory.add(location)
     }
 
     fun isTouching(other: Knot): Boolean =
-        abs(location.x - other.location.x) <= 1 && abs(location.y - other.location.y) <= 1
-
-    override fun toString(): String = location.toString()
+        abs(x - other.x) <= 1 && abs(y - other.y) <= 1
 }
 
 private class Rope(knotCount: Int) {
@@ -60,11 +56,11 @@ private class Rope(knotCount: Int) {
     fun moveHeadByOneStep(direction: Char) {
         val head = knots.first()
         val location = when (direction) {
-            'R' -> Location(head.location.x + 1, head.location.y)
-            'L' -> Location(head.location.x - 1, head.location.y)
-            'U' -> Location(head.location.x, head.location.y + 1)
-            'D' -> Location(head.location.x, head.location.y - 1)
-            else -> head.location
+            'R' -> Location(head.x + 1, head.y)
+            'L' -> Location(head.x - 1, head.y)
+            'U' -> Location(head.x, head.y + 1)
+            'D' -> Location(head.x, head.y - 1)
+            else -> Location(head.x, head.y)
         }
         head.setNewLocation(location)
     }
@@ -75,17 +71,19 @@ private class Rope(knotCount: Int) {
         val tail = knots[index]
         if (tail.isTouching(head)) return
 
+        // 1. if the head and tail share the same x or y values, the new location is average of the two.
+        // 2. if they are two steps apart on both axes, then also the new location is average of the two.
+        // 3 & 4 if they are apart by one step on one axis and by two on the other, move diagonally so that
+        // the distance is reduced by on step on both axes.
         val newLocation =
-            if ((tail.location.y == head.location.y) && abs(tail.location.x - head.location.x) > 1) { // same row
-                Location((tail.location.x + head.location.x) / 2, tail.location.y)
-            } else if ((tail.location.x == head.location.x) && abs(tail.location.y - head.location.y) > 1) { // same column
-                Location(tail.location.x, (tail.location.y + head.location.y) / 2)
-            } else if ((abs(tail.location.x - head.location.x) > 1) && (abs(tail.location.y - head.location.y) > 1)) { // apart by 2 on both axes
-                Location((tail.location.x + head.location.x) / 2, (tail.location.y + head.location.y) / 2)
-            } else if (abs(tail.location.x - head.location.x) > 1) { // apart by 2 on x-axis
-                Location((tail.location.x + head.location.x) / 2, head.location.y) // move diagonally
-            } else { // apart by 2 on y-axis
-                Location(head.location.x, (tail.location.y + head.location.y) / 2) // move diagonally
+            if (tail.x == head.x || tail.y == head.y) {
+                Location((tail.x + head.x) / 2, (tail.y + head.y) / 2)
+            } else if (abs(tail.x - head.x) == 2 && abs(tail.y - head.y) == 2) {
+                Location((tail.x + head.x) / 2, (tail.y + head.y) / 2)
+            } else if (abs(tail.x - head.x) == 2 && abs(tail.y - head.y) == 1) {
+                Location((tail.x + head.x) / 2, head.y)
+            } else {
+                Location(head.x, (tail.y + head.y) / 2)
             }
 
         assert(Knot(newLocation.x, newLocation.y).isTouching(head)) {
