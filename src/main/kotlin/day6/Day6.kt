@@ -1,4 +1,6 @@
-fun solveDay6() {
+package day6
+
+fun solve() {
     assert(testInput1.startOfPacket() == 7)
     assert(testInput2.startOfPacket() == 5)
     assert(testInput3.startOfPacket() == 6)

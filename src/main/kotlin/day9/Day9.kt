@@ -2,7 +2,7 @@ package day9
 
 import kotlin.math.abs
 
-fun solveDay9() {
+fun solve() {
     // part 1
     assert(testInput1.moveHistorySize(2) == 13)
     assert(realInput.moveHistorySize(2) == 5907)

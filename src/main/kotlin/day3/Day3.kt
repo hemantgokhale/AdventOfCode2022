@@ -1,4 +1,6 @@
-fun solveDay3() {
+package day3
+
+fun solve() {
     // part 1
     assert(getTotalRucksackPriority(testInput) == 157)
     assert(getTotalRucksackPriority(realInput) == 7997)

@@ -1,4 +1,6 @@
-fun solveDay7() {
+package day7
+
+fun solve() {
     solvePart1()
     solvePart2()
 }

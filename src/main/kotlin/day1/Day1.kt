@@ -1,4 +1,5 @@
-fun solveDay1() {
+package day1
+fun solve() {
     val sortedCalorieCounts = getCalorieCounts().sorted().reversed()
     println("Max calorie count: ${sortedCalorieCounts.first()}") // 69501
 

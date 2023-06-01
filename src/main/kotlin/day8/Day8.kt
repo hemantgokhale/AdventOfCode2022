@@ -1,4 +1,6 @@
-fun solveDay8() {
+package day8
+
+fun solve() {
     assert(testInput.readTrees().count { it.isVisible } == 21)
     assert(realInput.readTrees().count { it.isVisible } == 1870)
     assert(testInput.readTrees().maxBy { it.scenicScore }.scenicScore == 8)

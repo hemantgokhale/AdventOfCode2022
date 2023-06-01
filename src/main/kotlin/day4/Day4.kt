@@ -1,4 +1,6 @@
-fun solveDay4() {
+package day4
+
+fun solve() {
     assert(testInput.fullyContainedCount() == 2)
     assert(realInput.fullyContainedCount() == 462)
     assert(testInput.overlappingCount() == 4)

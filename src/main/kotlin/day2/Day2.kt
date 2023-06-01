@@ -1,4 +1,6 @@
-fun solveDay2() {
+package day2
+
+fun solve() {
     val totalScore = readGame(input = realInput).sumOf { round ->
         round.myScore
     }

@@ -1,4 +1,6 @@
-fun solveDay5() {
+package day5
+
+fun solve() {
     assert(testInput.part1Answer() == "CMZ")
     assert(realInput.part1Answer() == "ZBDRNPMVH")
 
