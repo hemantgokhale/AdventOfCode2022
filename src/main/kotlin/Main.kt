@@ -1,5 +1,4 @@
-import day9.solveDay9
 
 fun main() {
-    solveDay9()
+    day10.solve()
 }
