@@ -1,8 +1,11 @@
 package day10
 
 fun solve() {
-    assert(testInput2.totalStrength() == 13140)
+    assert(testInput.totalStrength() == 13140)
     assert(realInput.totalStrength() == 14340)
+
+    println(testInput.spritePattern())
+    println(realInput.spritePattern()) // the answer is PAPJCBHP
 }
 
 private val regex = Regex("""addx (-?\d+)""")
@@ -22,7 +25,7 @@ private fun String.operation(): Operation? =
 
 private fun String.operations(): Sequence<Operation> = lineSequence().mapNotNull { it.trim().operation() }
 
-private fun String.totalStrength(): Int {
+private fun String.registerValues(): List<Int> {
     val registerValues = mutableListOf<Int>() // contains value in the register at the end of each cycle
     registerValues.add(1) // starting value of the register (at the end of cycle 0)
     this.operations().forEach { operation ->
@@ -31,11 +34,30 @@ private fun String.totalStrength(): Int {
         }
         registerValues.add(registerValues.last() + operation.value)
     }
+    return registerValues
+}
 
+private fun String.totalStrength(): Int {
+    val registerValues = registerValues()
     return listOf(20, 60, 100, 140, 180, 220).sumOf { it * registerValues[it - 1] }
 }
 
-private val testInput2 = """
+private fun String.spritePattern(): String {
+    var answer = ""
+    val registerValues = this.registerValues()
+    for (i in registerValues.indices) {
+        val index = i % 40
+        if (index == 0) answer += "\n"
+        answer += if (index in registerValues[i] - 1..registerValues[i] + 1) {
+            "#"
+        } else {
+            "."
+        }
+    }
+    return answer
+}
+
+private val testInput = """
 addx 15
 addx -11
 addx 6
